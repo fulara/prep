@@ -6,3 +6,5 @@ authors = ["fulara <ntszar@gmail.com>"]
 [dependencies]
 glob = "0.2"
 regex = "0.2"
+getch = "0.1.1"
+clap = "2.25.0"
