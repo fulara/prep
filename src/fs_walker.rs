@@ -88,5 +88,15 @@ mod fs_walker_test {
     fn testing() {
         let fs = vec![td("t"), tf("t/a"), tf("t/b")];
         assert_filelist_glob("t/*", vec!["t/a", "t/b"]);
+
+        let a = vec!["pattern1/*", "pattern2/"];
+        let b = vec!["cc", "dd"];
+        let file_list = b.iter().map(|s| ::std::path::PathBuf::from(s));
+
+        for l in a.iter().filter_map(|s| glob(s).ok()).flat_map(|paths| paths.flat_map(|p| p.ok())).chain(file_list) {
+            println!("l {:?}", l);
+        }
+
+
     }
 }
