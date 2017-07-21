@@ -37,7 +37,7 @@ pub fn parse() -> Arguments {
                 .long("replace-with")
                 .short("x")
                 .takes_value(true)
-                .required(true),
+                /*.required(true) TODO: figure this, later. */
         )
         .arg(
             Arg::with_name("file-patterns")
@@ -47,19 +47,25 @@ pub fn parse() -> Arguments {
                 .takes_value(true)
                 .multiple(true)
                 .required(false),
+                /*.required_unless("files"), TODO: figure this, later. */
         )
         .arg(
             Arg::with_name("files")
                 .help("Files to process")
                 .multiple(true)
-                .required(false),
+                .required_unless("file-patterns"),
         )
         .get_matches();
 
-    let fp = matches
-        .values_of("file-patterns")
-        .map(|v| v.collect())
-        .unwrap_or(Vec::new());
+    let opt_values_to_string_list = |s: Option<::clap::Values>| {
+        s.map(|v| v.collect())
+            .unwrap_or(Vec::new())
+            .into_iter()
+            .map(|s| String::from(s))
+            .collect()
+    };
+
+    opt_values_to_string_list(matches.values_of("bla"));
 
     Arguments {
         search_pattern: matches
@@ -70,20 +76,8 @@ pub fn parse() -> Arguments {
             .value_of("replace-pattern")
             .expect("replace pattern is required")
             .into(),
-        file_patterns: matches
-            .values_of("file-patterns")
-            .map(|v| v.collect())
-            .unwrap_or(Vec::new())
-            .into_iter()
-            .map(|s| String::from(s))
-            .collect(),
-        files: matches
-            .values_of("files")
-            .map(|v| v.collect())
-            .unwrap_or(Vec::new())
-            .into_iter()
-            .map(|s| String::from(s))
-            .collect(),
+        file_patterns: opt_values_to_string_list(matches.values_of("file-patterns")),
+        files: opt_values_to_string_list(matches.values_of("files")),
         regex_enabled: matches.is_present("use-regex"),
     }
 
