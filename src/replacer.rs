@@ -7,14 +7,14 @@ pub struct Replacer {
 }
 
 impl Replacer {
-    fn new(mode: OperationMode, to: &str) -> Replacer {
+    pub fn new(mode: OperationMode, to: &str) -> Replacer {
         Replacer {
             mode: mode,
             to: to.into(),
         }
     }
 
-    fn replace(&self, text: &str) -> String {
+    pub fn replace(&self, text: &str) -> String {
         match self.mode {
             OperationMode::RawText(ref from) => text.replace(from, &self.to),
             OperationMode::Regex(ref regex) => regex.replace_all(text, &*self.to).into_owned(),

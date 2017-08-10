@@ -36,8 +36,7 @@ pub fn parse() -> Arguments {
                 .help("Replace pattern, pattern to be replaced")
                 .long("replace-with")
                 .short("x")
-                .takes_value(true)
-                /*.required(true) TODO: figure this, later. */
+                .takes_value(true), /*.required(true) TODO: figure this, later. */
         )
         .arg(
             Arg::with_name("file-patterns")
@@ -64,8 +63,6 @@ pub fn parse() -> Arguments {
             .map(|s| String::from(s))
             .collect()
     };
-
-    opt_values_to_string_list(matches.values_of("bla"));
 
     Arguments {
         search_pattern: matches
