@@ -3,6 +3,9 @@ name = "prep"
 version = "0.1.0"
 authors = ["fulara <ntszar@gmail.com>"]
 
+[[test]]
+name = "tests"
+
 [dependencies]
 glob = "0.2"
 regex = "0.2"
