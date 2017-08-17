@@ -11,7 +11,7 @@ pub const BINARY_PATH : &str = "target/debug/prep";
 
 pub fn get_file_content(file: &str) -> String {
     let path_buf = pb(file);
-    let mut file = File::open(path_buf).expect("opening file");
+    let mut file = File::open(path_buf.clone()).expect(&format!("opening file {:?}", path_buf));
     let mut text = String::new();
     file.read_to_string(&mut text).expect("reading file");
 
@@ -41,7 +41,7 @@ impl Drop for TestFs {
 
 impl TestFs {
     fn create(entities: &[FsEntity]) -> TestFs {
-        fs::create_dir_all(IT_PATH);
+        fs::create_dir_all(IT_PATH).expect("Failed during creation of it directory");
 
         for entity in entities {
             match entity {

@@ -15,5 +15,5 @@ fn simple_replace1() {
     assert_eq!("", String::from_utf8_lossy(&output.stderr));
     assert_eq!("", String::from_utf8_lossy(&output.stdout));
 
-    assert_eq!("bZbZ", get_file_content("file3"));
+    assert_eq!("bZcZ", get_file_content("file3"));
 }
