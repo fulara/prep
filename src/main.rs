@@ -1,6 +1,7 @@
 extern crate regex;
 extern crate glob;
 extern crate clap;
+extern crate libc;
 
 #[macro_use]
 extern crate itertools;
@@ -15,38 +16,27 @@ mod fs_walker;
 
 use std::io::{self, BufReader, BufWriter};
 use std::io::prelude::*;
-use std::fs::File;
-use std::fs::rename;
-
-//let f = File::open("foo.txt")?;
-//let f = BufReader::new(f);
-//
-//for line in f.lines() {
-//println!("{}", line.unwrap());
-//}
+use std::fs::{File, rename, remove_file};
+use libc::getpid;
 
 pub struct TemporaryPrepFile {
     pub writer: BufWriter<File>,
+    filename : String,
 }
 
 impl TemporaryPrepFile {
     fn new() -> TemporaryPrepFile {
-        let wf = File::create(Self::generate_file_name()).expect("Could not create temporary file");
-        TemporaryPrepFile { writer: BufWriter::new(wf) }
+        let filename = Self::generate_filename();
+        let wf = File::create(&filename).expect("Could not create temporary file");
+        TemporaryPrepFile { writer: BufWriter::new(wf), filename : filename }
     }
 
-    fn file_name(&self) -> &'static str {
-        return "prep_tmp_file";
+    fn filename(&self) -> &str {
+        return &self.filename;
     }
 
-    fn generate_file_name() -> String {
-        "prep_tmp_file".into()
-    }
-}
-
-impl Drop for TemporaryPrepFile {
-    fn drop(&mut self) {
-        //        drop(self.writer);
+    fn generate_filename() -> String {
+        format!("prep_tmp_file_{}", unsafe { getpid() })
     }
 }
 
@@ -72,6 +62,8 @@ pub fn main() {
             let mut curr = line_iterator.next();
             let mut next = line_iterator.next();
 
+            let mut did_at_least_one_replacement = false;
+
             while curr.is_some() {
                 let line_end = if let &Some(ref l) = &next { "\n" } else { "" };
 
@@ -79,6 +71,7 @@ pub fn main() {
 
                 if (matching::is_match(&mode, &line)) {
                     write!(tmp.writer, "{}{}", replacer.replace(&line), line_end);
+                    did_at_least_one_replacement = true;
                 } else {
                     write!(tmp.writer, "{}{}", line, line_end);
                 }
@@ -88,8 +81,12 @@ pub fn main() {
             }
 
 
-            tmp.writer.flush();
-            rename(tmp.file_name(), file);
+            if (did_at_least_one_replacement) {
+                let _ = tmp.writer.flush();
+                let _ = rename(tmp.filename(), file);
+            } else {
+                let _ = remove_file(tmp.filename());
+            }
         }
     }
 
