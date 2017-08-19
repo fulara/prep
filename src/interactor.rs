@@ -37,9 +37,9 @@ impl Interactor for RealInteractor {
         };
 
         let mut buf = [0u8];
-        io::stdin().read_exact(&mut buf).expect(
-            "Failed to read from terminal",
-        );
+        io::stdin()
+            .read_exact(&mut buf)
+            .expect("Failed to read from terminal");
 
         return buf[0];
     }

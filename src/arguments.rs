@@ -1,4 +1,4 @@
-use clap::{Arg, App, SubCommand};
+use clap::{App, Arg};
 
 pub struct Arguments {
     pub search_pattern: String,
@@ -6,6 +6,7 @@ pub struct Arguments {
     pub file_patterns: Vec<String>,
     pub files: Vec<String>,
     pub regex_enabled: bool,
+    pub accept_everything: bool,
 }
 
 pub fn parse() -> Arguments {
@@ -54,6 +55,14 @@ pub fn parse() -> Arguments {
                 .multiple(true)
                 .required_unless("file-patterns"),
         )
+        .arg(
+            Arg::with_name("accept-everything")
+                .help(
+                    "Will not prompt user whether to accept, just accepts everything",
+                )
+                .short("Y")
+                .long("accept-everything"),
+        )
         .get_matches();
 
     let opt_values_to_string_list = |s: Option<::clap::Values>| {
@@ -76,6 +85,7 @@ pub fn parse() -> Arguments {
         file_patterns: opt_values_to_string_list(matches.values_of("file-patterns")),
         files: opt_values_to_string_list(matches.values_of("files")),
         regex_enabled: matches.is_present("use-regex"),
+        accept_everything: matches.is_present("accept-everything"),
     }
 
 }

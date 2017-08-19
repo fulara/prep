@@ -3,20 +3,19 @@ extern crate glob;
 extern crate clap;
 extern crate libc;
 
-#[macro_use]
+//#[macro_use]
 extern crate itertools;
 
 mod replacer;
-mod matching;
 mod operation_mode;
 mod interactor;
 mod arguments;
 mod fs_walker;
 
 
-use std::io::{self, BufReader, BufWriter};
+use std::io::{BufReader, BufWriter};
 use std::io::prelude::*;
-use std::fs::{File, rename, remove_file};
+use std::fs::{remove_file, rename, File};
 use libc::getpid;
 
 use interactor::{ask_user, InteractionResult};
@@ -30,7 +29,10 @@ impl TemporaryPrepFile {
     fn new() -> TemporaryPrepFile {
         let filename = Self::generate_filename();
         let wf = File::create(&filename).expect("Could not create temporary file");
-        TemporaryPrepFile { writer: BufWriter::new(wf), filename: filename }
+        TemporaryPrepFile {
+            writer: BufWriter::new(wf),
+            filename: filename,
+        }
     }
 
     fn filename(&self) -> &str {
@@ -45,7 +47,7 @@ impl TemporaryPrepFile {
 pub fn main() {
     let args = arguments::parse();
 
-    let mode = if (args.regex_enabled) {
+    let mode = if args.regex_enabled {
         operation_mode::OperationMode::new_regex(&args.search_pattern).expect("Invalid regex")
     } else {
         operation_mode::OperationMode::new_raw(&args.search_pattern)
@@ -71,42 +73,51 @@ pub fn main() {
 
                 let mut line = curr.unwrap().expect("Failed to read out a line?").clone();
 
-                let mut do_replace = false;
-
                 let mut pos = 0usize;
 
-                while (matching::is_match(&mode, &line, pos)) {
-                    let result = replacer.replace(&line, pos);
-                    pos = result.position_of_replacement;
+                loop {
+                    line = if let Some(result) = replacer.replace(&line, pos) {
+                        pos = result.position_of_replacement;
+                        let mut should_do_replacement = args.accept_everything;
 
-                    match (ask_user(&format!("Replace:\n{}{}{}\nWith:\n{}{}{}", result.before,
-                                             result.old, result.after, result.before, result.new,
-                                             result.after))) {
-                        InteractionResult::Accept => {
-                            do_replace = true;
-                            let replaced_line = format!("{}{}{}", result.before, result.new, result.after);
-                            drop(result);
-                            line = replaced_line;
+                        if !should_do_replacement {
+                            match ask_user(&format!(
+                                "Should replace:\n{}{}{}\nWith:\n{}{}{}",
+                                result.before,
+                                result.old,
+                                result.after,
+                                result.before,
+                                result.new,
+                                result.after
+                            )) {
+                                InteractionResult::Accept => {
+                                    should_do_replacement = true;
+                                }
+                                _ => {}
+                            }
                         }
-                        _ => {
+
+                        if should_do_replacement {
+                            did_at_least_one_replacement = true;
+                            format!("{}{}{}", result.before, result.new, result.after)
+                        } else {
                             pos = result.before.len() + result.old.len();
+                            line.clone() // todo its sad that i am cloning here.
+                            //todo :( any other way around it?
                         }
+                    } else {
+                        break;
                     }
                 }
 
-                if (do_replace) {
-                    //                    write!(tmp.writer, "{}{}", replacer.replace(&line), line_end);
-                    did_at_least_one_replacement = true;
-                } else {
-                    write!(tmp.writer, "{}{}", line, line_end);
-                }
+                write!(tmp.writer, "{}{}", line, line_end).expect("Failed to write line to temp file.");
 
                 curr = next;
                 next = line_iterator.next();
             }
 
 
-            if (did_at_least_one_replacement) {
+            if did_at_least_one_replacement {
                 let _ = tmp.writer.flush();
                 let _ = rename(tmp.filename(), file);
             } else {

@@ -7,7 +7,7 @@ use std::path::PathBuf;
 use std::path::Path;
 
 const IT_PATH: &str = "it";
-pub const BINARY_PATH : &str = "target/debug/prep";
+pub const BINARY_PATH: &str = "target/debug/prep";
 
 pub fn get_file_content(file: &str) -> String {
     let path_buf = pb(file);
@@ -20,7 +20,11 @@ pub fn get_file_content(file: &str) -> String {
 
 pub fn set_file_content(file: &str, content: &str) {
     let path_buf = pb(file);
-    let mut file = OpenOptions::new().create(true).write(true).open(path_buf).expect("set_file_content opening file");
+    let mut file = OpenOptions::new()
+        .create(true)
+        .write(true)
+        .open(path_buf)
+        .expect("set_file_content opening file");
     file.write_all(content.as_bytes());
 
 }

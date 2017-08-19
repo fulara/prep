@@ -81,9 +81,9 @@ mod fs_walker_test {
 
     impl Drop for FsEntity {
         fn drop(&mut self) {
-            match (self) {
+            match self {
                 &mut FsEntity::Dir(ref p) => {
-                    fs::remove_dir_all(p);
+                    let _ = fs::remove_dir_all(p);
                 }
                 _ => {}
             }
@@ -94,12 +94,12 @@ mod fs_walker_test {
         p.as_ref().to_path_buf()
     }
     fn td<P: AsRef<Path>>(p: P) -> FsEntity {
-        fs::create_dir_all(&p);
+        fs::create_dir_all(&p).unwrap();
         FsEntity::Dir(pb(p))
     }
 
     fn tf<P: AsRef<Path>>(p: P) -> FsEntity {
-        File::create(&p);
+        File::create(&p).unwrap();
         FsEntity::File(pb(p))
     }
 
@@ -107,10 +107,8 @@ mod fs_walker_test {
         let walker = FsWalker::new(vec![glob.into()], file_list);
         let iter = walker.iter();
         let v: Vec<String> = iter.map(|pb| {
-            pb.to_str().map_or(
-                Option::None,
-                |opt_str| Some(opt_str.to_owned()),
-            )
+            pb.to_str()
+                .map_or(Option::None, |opt_str| Some(opt_str.to_owned()))
         }).filter_map(|opt_str| opt_str)
             .collect();
 
@@ -119,7 +117,7 @@ mod fs_walker_test {
 
     #[test]
     fn testing() {
-        let fs = vec![td("t"), tf("t/a"), tf("t/b"), td("t/t"), tf("t/t/a")];
+        let _fs = vec![td("t"), tf("t/a"), tf("t/b"), td("t/t"), tf("t/t/a")];
         //normal case
         assert_filelist_glob("t/*", vec!["t/t/a".into()], vec!["t/a", "t/b", "t/t/a"]);
 
