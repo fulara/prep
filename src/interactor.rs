@@ -15,6 +15,7 @@ pub fn ask_user(about: &str) -> InteractionResult {
 }
 
 fn ask_user_impl(about: &str, interactor: &mut Interactor) -> InteractionResult {
+    println!("{}", about);
     match interactor.get_key() as char {
         'y' => InteractionResult::Accept,
         _ => InteractionResult::Reject,
@@ -26,6 +27,7 @@ trait Interactor {
 }
 
 struct RealInteractor;
+
 impl Interactor for RealInteractor {
     fn get_key(&mut self) -> u8 {
         if let Ok(getch) = getch::Getch::new() {
@@ -74,6 +76,7 @@ mod interactor_test {
     }
 
     use super::*;
+
     #[test]
     fn testing_interaction() {
         assert_eq!(
@@ -91,6 +94,5 @@ mod interactor_test {
                 &mut FakeInteractor::new(String::from("y").into_bytes()),
             )
         );
-
     }
 }

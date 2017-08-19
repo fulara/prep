@@ -19,16 +19,18 @@ use std::io::prelude::*;
 use std::fs::{File, rename, remove_file};
 use libc::getpid;
 
+use interactor::{ask_user, InteractionResult};
+
 pub struct TemporaryPrepFile {
     pub writer: BufWriter<File>,
-    filename : String,
+    filename: String,
 }
 
 impl TemporaryPrepFile {
     fn new() -> TemporaryPrepFile {
         let filename = Self::generate_filename();
         let wf = File::create(&filename).expect("Could not create temporary file");
-        TemporaryPrepFile { writer: BufWriter::new(wf), filename : filename }
+        TemporaryPrepFile { writer: BufWriter::new(wf), filename: filename }
     }
 
     fn filename(&self) -> &str {
@@ -65,12 +67,35 @@ pub fn main() {
             let mut did_at_least_one_replacement = false;
 
             while curr.is_some() {
-                let line_end = if let &Some(ref l) = &next { "\n" } else { "" };
+                let line_end = if next.is_some() { "\n" } else { "" };
 
-                let line = &curr.unwrap().expect("Failed to read out a line?");
+                let mut line = curr.unwrap().expect("Failed to read out a line?").clone();
 
-                if (matching::is_match(&mode, &line)) {
-                    write!(tmp.writer, "{}{}", replacer.replace(&line), line_end);
+                let mut do_replace = false;
+
+                let mut pos = 0usize;
+
+                while (matching::is_match(&mode, &line, pos)) {
+                    let result = replacer.replace(&line, pos);
+                    pos = result.position_of_replacement;
+
+                    match (ask_user(&format!("Replace:\n{}{}{}\nWith:\n{}{}{}", result.before,
+                                             result.old, result.after, result.before, result.new,
+                                             result.after))) {
+                        InteractionResult::Accept => {
+                            do_replace = true;
+                            let replaced_line = format!("{}{}{}", result.before, result.new, result.after);
+                            drop(result);
+                            line = replaced_line;
+                        }
+                        _ => {
+                            pos = result.before.len() + result.old.len();
+                        }
+                    }
+                }
+
+                if (do_replace) {
+                    //                    write!(tmp.writer, "{}{}", replacer.replace(&line), line_end);
                     did_at_least_one_replacement = true;
                 } else {
                     write!(tmp.writer, "{}{}", line, line_end);
@@ -89,5 +114,4 @@ pub fn main() {
             }
         }
     }
-
 }
