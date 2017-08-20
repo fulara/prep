@@ -37,11 +37,17 @@ impl Replacer {
                 Option::None
             },
             OperationMode::Regex(ref regex) => if let Some(mat) = regex.find_at(text, start) {
-                let new = regex
-                    .replace(&text[mat.start()..mat.end()], &*self.to)
-                    .into_owned();
+                let (new, position) = if mat.start() != mat.end() {
+                    let new = regex
+                        .replace(&text[mat.start()..mat.end()], &*self.to)
+                        .into_owned();
 
-                let position = mat.start() + new.len();
+                    let position = mat.start() + new.len();
+                    (new, position)
+                } else {
+                    panic!("app does not handle empty matches... - waiting for fix in regex crate");
+                };
+
                 Some(ReplaceResult {
                     before: &text[0..mat.start()],
                     after: &text[mat.end()..],
@@ -82,6 +88,21 @@ mod replace_test {
         assert("cdcdad", 3, r.replace("cdbdad", 0).unwrap());
         assert("cdcdcd", 5, r.replace("cdcdad", 0).unwrap());
         assert_eq!(Option::None, r.replace("cdcdcd", 5));
+    }
+
+    #[test]
+    fn regex_using_line_begs_and_ends() {
+//        let r = Replacer::new(OperationMode::new_regex("$").unwrap(), "begin");
+//        assert("_begin", 6, r.replace("_", 0).unwrap());
+        //todo - wait for fix in regex crate
+        //using just ^ will fail due to a bug in rust regex at least i think its a bug. .
+    }
+
+    #[test]
+    fn zero_string_matches() {
+        let r = Replacer::new(OperationMode::new_regex("\\d*").unwrap(), "X");
+//todo - wait for release of regex        assert("Xaaa", 2, r.replace("aaa", 0).unwrap());
+
     }
 
     #[test]
