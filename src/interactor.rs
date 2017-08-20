@@ -10,8 +10,7 @@ pub enum InteractionResult {
 }
 
 pub fn ask_user(about: &str) -> InteractionResult {
-    ask_user_impl(about, &mut RealInteractor {});
-    InteractionResult::Accept
+    ask_user_impl(about, &mut RealInteractor {})
 }
 
 fn ask_user_impl(about: &str, interactor: &mut Interactor) -> InteractionResult {

@@ -7,6 +7,7 @@ pub struct Arguments {
     pub files: Vec<String>,
     pub regex_enabled: bool,
     pub accept_everything: bool,
+    pub colorless: bool,
 }
 
 pub fn parse() -> Arguments {
@@ -37,7 +38,8 @@ pub fn parse() -> Arguments {
                 .help("Replace pattern, pattern to be replaced")
                 .long("replace-with")
                 .short("x")
-                .takes_value(true), /*.required(true) TODO: figure this, later. */
+                .takes_value(true)
+                .required(true),
         )
         .arg(
             Arg::with_name("file-patterns")
@@ -47,7 +49,7 @@ pub fn parse() -> Arguments {
                 .takes_value(true)
                 .multiple(true)
                 .required(false),
-                /*.required_unless("files"), TODO: figure this, later. */
+            /*.required_unless("files"), TODO: figure this, later. */
         )
         .arg(
             Arg::with_name("files")
@@ -62,6 +64,12 @@ pub fn parse() -> Arguments {
                 )
                 .short("Y")
                 .long("accept-everything"),
+        )
+        .arg(
+            Arg::with_name("colorless")
+                .help("Will disable colors")
+                .short("C")
+                .long("colorless"),
         )
         .get_matches();
 
@@ -86,6 +94,6 @@ pub fn parse() -> Arguments {
         files: opt_values_to_string_list(matches.values_of("files")),
         regex_enabled: matches.is_present("use-regex"),
         accept_everything: matches.is_present("accept-everything"),
+        colorless: matches.is_present("colorless"),
     }
-
 }

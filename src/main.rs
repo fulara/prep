@@ -2,7 +2,7 @@ extern crate regex;
 extern crate glob;
 extern crate clap;
 extern crate libc;
-
+extern crate colored;
 //#[macro_use]
 extern crate itertools;
 
@@ -17,6 +17,8 @@ use std::io::{BufReader, BufWriter};
 use std::io::prelude::*;
 use std::fs::{remove_file, rename, File};
 use libc::getpid;
+
+use colored::*;
 
 use interactor::{ask_user, InteractionResult};
 
@@ -53,6 +55,8 @@ pub fn main() {
         operation_mode::OperationMode::new_raw(&args.search_pattern)
     };
 
+    colored::control::set_override(!args.colorless);
+
     let replacer = replacer::Replacer::new(mode.clone(), &args.replace_pattern);
 
     let walker = fs_walker::FsWalker::new(args.file_patterns, args.files);
@@ -84,10 +88,10 @@ pub fn main() {
                             match ask_user(&format!(
                                 "Should replace:\n{}{}{}\nWith:\n{}{}{}",
                                 result.before,
-                                result.old,
+                                result.old.green(),
                                 result.after,
                                 result.before,
-                                result.new,
+                                result.new.red(),
                                 result.after
                             )) {
                                 InteractionResult::Accept => {
@@ -102,15 +106,15 @@ pub fn main() {
                             format!("{}{}{}", result.before, result.new, result.after)
                         } else {
                             pos = result.before.len() + result.old.len();
-                            line.clone() // todo its sad that i am cloning here.
-                            //todo :( any other way around it?
+                            format!("{}{}{}", result.before, result.old, result.after)
                         }
                     } else {
                         break;
                     }
                 }
 
-                write!(tmp.writer, "{}{}", line, line_end).expect("Failed to write line to temp file.");
+                write!(tmp.writer, "{}{}", line, line_end)
+                    .expect("Failed to write line to temp file.");
 
                 curr = next;
                 next = line_iterator.next();

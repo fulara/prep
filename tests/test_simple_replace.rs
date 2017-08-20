@@ -22,26 +22,26 @@ fn simple_replace1() {
 }
 
 #[test]
-fn ask_user() {
+fn ask_user_user_accepts_all() {
     let fs = setup(&[tf("file3")]);
 
     set_file_content("file3", "baca");
 
     let process = Command::new(BINARY_PATH)
-        .args(&["-s", "a", "-x", "Z", "it/file3"])
+        .args(&["-s", "a", "-x", "Z", "-C", "it/file3"])
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .spawn()
         .expect("123");
 
-    let mut s = String::new();
+    let mut output = String::new();
     let mut buf: [u8; 4] = [0, 0, 0, 0];
     let mut stdin = process.stdin.unwrap(); //.write_all("alfa".as_bytes());
     //    process.stdin.unwrap().write_all("beta".as_bytes());
     stdin.write_all("yy".as_bytes());
     let mut v: Vec<u8> = Vec::new();
     let mut stdout = process.stdout.unwrap();
-    stdout.read_to_string(&mut s);
+    stdout.read_to_string(&mut output);
 
     assert_eq!(
         "Should replace:
@@ -53,10 +53,54 @@ bZca
 With:
 bZcZ
 ",
-        s
+        output
     );
 
-    //    assert!(output.status.success());
-    //    assert_eq!("", String::from_utf8_lossy(&output.stderr));
-    //    assert_eq!("", String::from_utf8_lossy(&output.stdout));
+    assert_eq!("bZcZ", get_file_content("file3"))
+}
+
+
+#[test]
+fn ask_user_user_rejects_some() {
+    let fs = setup(&[tf("file3")]);
+
+    set_file_content("file3", "babababa");
+
+    let process = Command::new(BINARY_PATH)
+        .args(&["-s", "a", "-x", "Z", "-C", "it/file3"])
+        .stdin(Stdio::piped())
+        .stdout(Stdio::piped())
+        .spawn()
+        .expect("123");
+
+    let mut output = String::new();
+    let mut buf: [u8; 4] = [0, 0, 0, 0];
+    let mut stdin = process.stdin.unwrap(); //.write_all("alfa".as_bytes());
+    //    process.stdin.unwrap().write_all("beta".as_bytes());
+    stdin.write_all("ynyn".as_bytes());
+    let mut stdout = process.stdout.unwrap();
+    stdout.read_to_string(&mut output);
+
+    assert_eq!(
+        "Should replace:
+babababa
+With:
+bZbababa
+Should replace:
+bZbababa
+With:
+bZbZbaba
+Should replace:
+bZbababa
+With:
+bZbabZba
+Should replace:
+bZbabZba
+With:
+bZbabZbZ
+",
+        output
+    );
+
+    assert_eq!("bZbabZba", get_file_content("file3"));
 }
