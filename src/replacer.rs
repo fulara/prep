@@ -54,6 +54,17 @@ impl Replacer {
             },
         }
     }
+
+    pub fn replace_all<'a>(&self, text: &'a str) -> String {
+        match self.mode {
+            OperationMode::RawText(ref from) => {
+                text.replace(from, &*self.to)
+            },
+            OperationMode::Regex(ref regex) => {
+                regex.replace_all(text, &*self.to).into_owned()
+            },
+        }
+    }
 }
 
 #[cfg(test)]

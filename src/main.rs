@@ -57,19 +57,20 @@ pub fn main() {
     };
 
     colored::control::set_override(!args.colorless);
-
-//    let stdin = ::std::io::stdin();
-//    let stdin = stdin.lock();
-//
-//    for l in stdin.lines() {
-//        println!("line1 is: {:?}", l);
-//    }
-//
-//    return;
+    //    return;
 
 
 
     let replacer = replacer::Replacer::new(mode.clone(), &args.replace_pattern);
+
+    if !args.ignore_stdin {
+        let stdin = ::std::io::stdin();
+        let stdin = stdin.lock();
+
+        for l in stdin.lines() {
+            println!("{}", replacer.replace_all(l.as_ref().unwrap()));
+        }
+    }
 
     let walker = fs_walker::FsWalker::new(args.file_patterns, args.files);
     for file in walker.iter() {

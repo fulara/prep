@@ -10,7 +10,7 @@ fn simple_replace1() {
     set_file_content("file3", "baca");
 
     let output = Command::new(BINARY_PATH)
-        .args(&["-s", "a", "-x", "Z", "-Y", "it/file3"])
+        .args(&["-s", "a", "-x", "Z", "-Y", "-Q", "it/file3"])
         .output()
         .expect("123");
 
@@ -28,7 +28,7 @@ fn ask_user_user_accepts_all() {
     set_file_content("file3", "baca");
 
     let process = Command::new(BINARY_PATH)
-        .args(&["-s", "a", "-x", "Z", "-C", "it/file3"])
+        .args(&["-s", "a", "-x", "Z", "-C", "-Q", "it/file3"])
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .spawn()
@@ -64,7 +64,7 @@ fn ask_user_user_rejects_some() {
     set_file_content("file3", "babababa");
 
     let process = Command::new(BINARY_PATH)
-        .args(&["-s", "a", "-x", "Z", "-C", "it/file3"])
+        .args(&["-s", "a", "-x", "Z", "-C", "-Q", "it/file3"])
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .spawn()

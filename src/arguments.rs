@@ -8,6 +8,7 @@ pub struct Arguments {
     pub regex_enabled: bool,
     pub accept_everything: bool,
     pub colorless: bool,
+    pub ignore_stdin: bool,
 }
 
 pub fn parse() -> Arguments {
@@ -53,7 +54,7 @@ pub fn parse() -> Arguments {
         .arg(
             Arg::with_name("files")
                 .help("Files to process")
-                .multiple(true)
+                .multiple(true),
         )
         .arg(
             Arg::with_name("accept-everything")
@@ -69,6 +70,7 @@ pub fn parse() -> Arguments {
                 .short("C")
                 .long("colorless"),
         )
+        .arg(Arg::with_name("ignore-stdin").hidden(true).short("Q"))
         .get_matches();
 
     let opt_values_to_string_list = |s: Option<::clap::Values>| {
@@ -93,5 +95,6 @@ pub fn parse() -> Arguments {
         regex_enabled: matches.is_present("use-regex"),
         accept_everything: matches.is_present("accept-everything"),
         colorless: matches.is_present("colorless"),
+        ignore_stdin: matches.is_present("ignore-stdin"),
     }
 }
