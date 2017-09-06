@@ -8,7 +8,7 @@ name = "tests"
 
 [dependencies]
 glob = "0.2"
-regex = "0.2"
+regex = { git = "https://github.com/fulara/regex", branch = "applied-fixes" }
 getch = "0.1.1"
 clap = "2.25.0"
 itertools = "0.6.0"

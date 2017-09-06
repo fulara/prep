@@ -57,7 +57,6 @@ impl<'a> FsWalkerIterator<'a> {
                     .filter(|pb| pb.as_path().is_file()),
             ),
         }
-
     }
 }
 

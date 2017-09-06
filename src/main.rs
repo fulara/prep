@@ -1,9 +1,10 @@
-extern crate regex;
-extern crate glob;
 extern crate clap;
-extern crate libc;
 extern crate colored;
+extern crate glob;
+extern crate libc;
+extern crate regex;
 //#[macro_use]
+
 extern crate itertools;
 
 mod replacer;
@@ -56,6 +57,17 @@ pub fn main() {
     };
 
     colored::control::set_override(!args.colorless);
+
+//    let stdin = ::std::io::stdin();
+//    let stdin = stdin.lock();
+//
+//    for l in stdin.lines() {
+//        println!("line1 is: {:?}", l);
+//    }
+//
+//    return;
+
+
 
     let replacer = replacer::Replacer::new(mode.clone(), &args.replace_pattern);
 

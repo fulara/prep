@@ -25,8 +25,7 @@ pub fn set_file_content(file: &str, content: &str) {
         .write(true)
         .open(path_buf)
         .expect("set_file_content opening file");
-    file.write_all(content.as_bytes());
-
+    file.write_all(content.as_bytes()).unwrap();
 }
 
 #[derive(Debug)]
@@ -39,7 +38,7 @@ pub struct TestFs {}
 
 impl Drop for TestFs {
     fn drop(&mut self) {
-        fs::remove_dir_all(IT_PATH);
+        fs::remove_dir_all(IT_PATH).unwrap();
     }
 }
 
@@ -50,10 +49,10 @@ impl TestFs {
         for entity in entities {
             match entity {
                 &FsEntity::Dir(ref pb) => {
-                    fs::create_dir_all(pb);
+                    fs::create_dir_all(pb).unwrap();
                 }
                 &FsEntity::File(ref pb) => {
-                    File::create(pb);
+                    File::create(pb).unwrap();
                 }
             }
         }
@@ -75,6 +74,6 @@ pub fn tf<P: AsRef<Path>>(p: P) -> FsEntity {
     FsEntity::File(pb(p))
 }
 
-pub fn setup(mut entities: &[FsEntity]) -> TestFs {
+pub fn setup(entities: &[FsEntity]) -> TestFs {
     TestFs::create(&entities)
 }

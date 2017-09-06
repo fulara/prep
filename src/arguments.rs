@@ -14,7 +14,7 @@ pub fn parse() -> Arguments {
     let matches = App::new("prep")
         .version("0.1")
         .author("fulara")
-        .about("basically very basic sed with rpeview")
+        .about("basically very basic sed with preview")
         .arg(
             Arg::with_name("search-pattern")
                 .help(
@@ -42,20 +42,18 @@ pub fn parse() -> Arguments {
                 .required(true),
         )
         .arg(
-            Arg::with_name("file-patterns")
-                .help("File patterns - accepts glob patterns. ")
-                .long("file-pattern")
-                .short("f")
+            Arg::with_name("glob-file-search")
+                .help("glob file search")
+                .long("glob-file-search")
+                .short("g")
                 .takes_value(true)
                 .multiple(true)
                 .required(false),
-            /*.required_unless("files"), TODO: figure this, later. */
         )
         .arg(
             Arg::with_name("files")
                 .help("Files to process")
                 .multiple(true)
-                .required_unless("file-patterns"),
         )
         .arg(
             Arg::with_name("accept-everything")
@@ -90,7 +88,7 @@ pub fn parse() -> Arguments {
             .value_of("replace-pattern")
             .expect("replace pattern is required")
             .into(),
-        file_patterns: opt_values_to_string_list(matches.values_of("file-patterns")),
+        file_patterns: opt_values_to_string_list(matches.values_of("glob-file-search")),
         files: opt_values_to_string_list(matches.values_of("files")),
         regex_enabled: matches.is_present("use-regex"),
         accept_everything: matches.is_present("accept-everything"),

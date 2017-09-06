@@ -5,7 +5,7 @@ use common::*;
 
 #[test]
 fn simple_replace1() {
-    let fs = setup(&[tf("file3")]);
+    let _fs = setup(&[tf("file3")]);
 
     set_file_content("file3", "baca");
 
@@ -14,7 +14,7 @@ fn simple_replace1() {
         .output()
         .expect("123");
 
-    //    assert!(output.status.success());
+    assert!(output.status.success());
     assert_eq!("", String::from_utf8_lossy(&output.stderr));
     assert_eq!("", String::from_utf8_lossy(&output.stdout));
 
@@ -23,7 +23,7 @@ fn simple_replace1() {
 
 #[test]
 fn ask_user_user_accepts_all() {
-    let fs = setup(&[tf("file3")]);
+    let _fs = setup(&[tf("file3")]);
 
     set_file_content("file3", "baca");
 
@@ -35,13 +35,10 @@ fn ask_user_user_accepts_all() {
         .expect("123");
 
     let mut output = String::new();
-    let mut buf: [u8; 4] = [0, 0, 0, 0];
-    let mut stdin = process.stdin.unwrap(); //.write_all("alfa".as_bytes());
-    //    process.stdin.unwrap().write_all("beta".as_bytes());
-    stdin.write_all("yy".as_bytes());
-    let mut v: Vec<u8> = Vec::new();
+    let mut stdin = process.stdin.unwrap();
+    stdin.write_all("yy".as_bytes()).unwrap();
     let mut stdout = process.stdout.unwrap();
-    stdout.read_to_string(&mut output);
+    stdout.read_to_string(&mut output).unwrap();
 
     assert_eq!(
         "Should replace:
@@ -62,7 +59,7 @@ bZcZ
 
 #[test]
 fn ask_user_user_rejects_some() {
-    let fs = setup(&[tf("file3")]);
+    let _fs = setup(&[tf("file3")]);
 
     set_file_content("file3", "babababa");
 
@@ -74,12 +71,11 @@ fn ask_user_user_rejects_some() {
         .expect("123");
 
     let mut output = String::new();
-    let mut buf: [u8; 4] = [0, 0, 0, 0];
     let mut stdin = process.stdin.unwrap(); //.write_all("alfa".as_bytes());
     //    process.stdin.unwrap().write_all("beta".as_bytes());
-    stdin.write_all("ynyn".as_bytes());
+    stdin.write_all("ynyn".as_bytes()).unwrap();
     let mut stdout = process.stdout.unwrap();
-    stdout.read_to_string(&mut output);
+    stdout.read_to_string(&mut output).unwrap();
 
     assert_eq!(
         "Should replace:
